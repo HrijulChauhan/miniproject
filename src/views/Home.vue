@@ -3,14 +3,13 @@ import { supabase } from "../lib/supabaseClient";
 import { ref, onMounted } from "vue";
 
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
-import { ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 
 const todo = ref([]);
 const progress = ref([]);
 const review = ref([]);
 const archive = ref([]);
 
-const open = ref(true);
+const open = ref(false);
 
 async function getTodo() {
   const { data } = await supabase.from("tasks").select().eq("tag", "todo");
@@ -66,6 +65,23 @@ onMounted(() => {
   getReview();
   getArchive();
 });
+
+const title = ref("");
+const tag = ref("");
+const severity = ref("");
+
+async function newIssue() {
+  const { error } = await supabase.from("tasks").insert({ title: title.value, tag: tag.value, severity: severity.value });
+  if (error) {
+    console.log(error);
+  } else {
+    open.value = false;
+    getTodo();
+    getProgress();
+    getReview();
+    getArchive();
+  }
+}
 </script>
 
 <template>
@@ -257,7 +273,7 @@ onMounted(() => {
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="flex min-h-full justify-center text-center items-center">
           <TransitionChild
             as="template"
             enter="ease-out duration-300"
@@ -267,50 +283,45 @@ onMounted(() => {
             leave-from="opacity-100 translate-y-0 sm:scale-100"
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <DialogPanel class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 pb-6 pt-6 sm:w-full sm:max-w-lg">
-              <div class="flex w-[90%] justify-between  mx-auto">
-                <span>
-                  <label for="" class="text-xs text-black font-medium">Title</label> <br />
-                  <input type="text"  name="name" placeholder="Bug Fix #1148a" id="" class="border-gray-300 border-2 w-56 rounded text-sm px-2 py-1" />
-                </span>
-                <span>
-                  <label for="" class="text-xs text-black font-medium">Tag</label> <br />
-                  <Select class="border-gray-300 border-0 rounded text-sm px-2 py-2 w-56  text-white bg-gray-950">
-                    <option value="" class="">Todo</option>
-                    <option value="">In Progress</option>
-                    <option value="">In review</option>
-                    <option value="">Archived</option>
-                  </Select>
-                </span>
-              </div>
-              <div class="flex w-[90%] justify-between pt-3 mx-auto">
-                <span>
-                  <label for="" class="text-xs text-black font-medium">Tag</label> <br />
-                  <input type="text" name="name" placeholder="John Doe" id="" class="border-gray-300 border-2 rounded w-56 text-sm px-2 py-1" />
-                </span>
-                <span>
-                  <label for="" class="text-xs text-black font-medium">Mail ID</label> <br />
-                  <input type="text" name="name" placeholder="john.doe@gmail.com" id="" class="border-gray-300  w-56 border-2 rounded text-sm px-2 py-1" />
-                </span>
-              </div>
-              <div class="bg-slate-50 pt-4">
-                <div class="w-[90%] mx-auto flex justify-end">
-                  <button
-                    type="button"
-                    class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                    @click="open = false"
-                    ref="cancelButtonRef"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
-                    @click="open = false"
-                  >
-                    Submit
-                  </button>
-                </div>
+            <DialogPanel class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all px-10 py-10 w-[22vw]">
+              <h2 class="text-center mb-2 text-lg">New Issue</h2>
+
+              <label for="" class="text-xs text-black font-medium">Title</label> <br />
+              <input type="text" v-model="title" name="name" placeholder="Bug Fix #1148a" id="" class="border-gray-300 border-2 w-full rounded text-sm px-2 py-2 mb-2" /> <br />
+
+              <label for="" class="text-xs text-black font-medium mt-4">Tag</label> <br />
+              <select v-model="tag" class="border-2 border-gray-300 w-full px-2 py-2 rounded mb-2">
+                <option disabled value="">please select one</option>
+                <option>todo</option>
+                <option>progress</option>
+                <option>review</option>
+                <option>archive</option>
+              </select>
+
+              <label for="" class="text-xs text-black font-medium mt-4">Severity</label> <br />
+              <select v-model="severity" class="border-2 border-gray-300 w-full px-2 py-2 rounded mb-2">
+                <option disabled value="">please select one</option>
+                <option>easy</option>
+                <option>medium</option>
+                <option>severe</option>
+              </select>
+
+              <div class="mx-auto flex justify-end mt-4">
+                <button
+                  type="button"
+                  class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                  @click="open = false"
+                  ref="cancelButtonRef"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
+                  @click="newIssue()"
+                >
+                  Submit
+                </button>
               </div>
             </DialogPanel>
           </TransitionChild>
