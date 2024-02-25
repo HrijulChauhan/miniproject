@@ -76,6 +76,9 @@ async function newIssue() {
     console.log(error);
   } else {
     open.value = false;
+    title.value = "";
+    tag.value = "";
+    severity.value = "";
     getTodo();
     getProgress();
     getReview();
