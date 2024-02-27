@@ -1,8 +1,8 @@
 <template>
-  <!-- <label for="" class="">first name</label> <br>
+  <label for="" class="">first name</label> <br>
   <input type="text" class="border border-black" v-model="name">
   <input ref="file" type="file" accept=".jpg,.png,.jpeg" />
-  <button @click="handleFileUpload" class="border-black border p-2">submit</button> -->
+  <button @click="handleFileUpload" class="border-black border p-2">submit</button>
   <div class="h-screen flex-col justify-center">
     <div class="mt-28 text-center">
       <img src="https://imgur.com/euNkdrX.png" alt="" class="mx-auto h-10 w-auto mb-5" />
