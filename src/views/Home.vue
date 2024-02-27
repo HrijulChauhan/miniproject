@@ -10,6 +10,22 @@ const review = ref([]);
 const archive = ref([]);
 
 const open = ref(false);
+const email = ref("");
+const pic = ref("")
+
+async function sessionData(){
+  const { data, error } = await supabase.auth.getSession()
+  if(error){
+    console.log(error)
+  }
+  else{
+    email.value = data.session.user.email;
+    console.log(email.value);
+    pic.value = supabase.storage.from('profilePictures').getPublicUrl('public/' + email.value);
+    pic.value = pic.value.data.publicUrl;
+    
+  }
+}
 
 async function getTodo() {
   const { data } = await supabase.from("tasks").select().eq("tag", "todo");
@@ -60,6 +76,7 @@ async function getArchive() {
 }
 
 onMounted(() => {
+  sessionData();
   getTodo();
   getProgress();
   getReview();
@@ -71,7 +88,7 @@ const tag = ref("");
 const severity = ref("");
 
 async function newIssue() {
-  const { error } = await supabase.from("tasks").insert({ title: title.value, tag: tag.value, severity: severity.value });
+  const { error } = await supabase.from("tasks").insert({ title: title.value, tag: tag.value, severity: severity.value, picture: pic.value });
   if (error) {
     console.log(error);
   } else {
@@ -163,7 +180,7 @@ async function newIssue() {
                   >
                     {{ task.severity }}
                   </div>
-                  <img src="https://imgur.com/F5iA6w0.png" alt="" class="mt-1 h-8 rounded-full" />
+                  <img :src=task.picture  alt="" class="mt-1 h-8 rounded-full" />
                 </div>
               </a>
             </li>
@@ -195,7 +212,7 @@ async function newIssue() {
                     {{ task.severity }}
                   </div>
 
-                  <img src="https://imgur.com/F5iA6w0.png" alt="" class="mt-1 h-8 rounded-full" />
+                  <img :src=task.picture  alt="" class="mt-1 h-8 rounded-full" />
                 </div>
               </a>
             </li>
@@ -227,7 +244,7 @@ async function newIssue() {
                     {{ task.severity }}
                   </div>
 
-                  <img src="https://imgur.com/F5iA6w0.png" alt="" class="mt-1 h-8 rounded-full" />
+                  <img :src=task.picture  alt="" class="mt-1 h-8 rounded-full" />
                 </div>
               </a>
             </li>
@@ -259,7 +276,7 @@ async function newIssue() {
                     {{ task.severity }}
                   </div>
 
-                  <img src="https://imgur.com/F5iA6w0.png" alt="" class="mt-1 h-8 rounded-full" />
+                  <img :src=task.picture  alt="" class="mt-1 h-8 rounded-full" />
                 </div>
               </a>
             </li>
