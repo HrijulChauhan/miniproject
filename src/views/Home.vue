@@ -11,19 +11,17 @@ const archive = ref([]);
 
 const open = ref(false);
 const email = ref("");
-const pic = ref("")
+const pic = ref("");
 
-async function sessionData(){
-  const { data, error } = await supabase.auth.getSession()
-  if(error){
-    console.log(error)
-  }
-  else{
+async function sessionData() {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) {
+    console.log(error);
+  } else {
     email.value = data.session.user.email;
     console.log(email.value);
-    pic.value = supabase.storage.from('profilePictures').getPublicUrl('public/' + email.value);
+    pic.value = supabase.storage.from("profilePictures").getPublicUrl("public/" + email.value);
     pic.value = pic.value.data.publicUrl;
-    
   }
 }
 
@@ -142,7 +140,9 @@ async function newIssue() {
     </section>
 
     <section class="w-[85vw]">
-      <div class="text-gray-600 pl-8 pt-8">Projects / Grand Budapest</div>
+      <router-link to="/projects">
+        <div class="text-gray-600 pl-8 pt-8"> <span class="underline text-orange-600">Projects</span>/ Grand Budapest</div>
+      </router-link>
       <main class="flex justify-between pb-4">
         <h2 class="text-gray-700 font-semibold text-3xl pl-8">Board</h2>
         <!-- weird thing I found -->
@@ -180,7 +180,7 @@ async function newIssue() {
                   >
                     {{ task.severity }}
                   </div>
-                  <img :src=task.picture  alt="" class="mt-1 h-8 rounded-full" />
+                  <img :src="task.picture" alt="" class="mt-1 h-8 rounded-full" />
                 </div>
               </a>
             </li>
@@ -212,7 +212,7 @@ async function newIssue() {
                     {{ task.severity }}
                   </div>
 
-                  <img :src=task.picture  alt="" class="mt-1 h-8 rounded-full" />
+                  <img :src="task.picture" alt="" class="mt-1 h-8 rounded-full" />
                 </div>
               </a>
             </li>
@@ -244,7 +244,7 @@ async function newIssue() {
                     {{ task.severity }}
                   </div>
 
-                  <img :src=task.picture  alt="" class="mt-1 h-8 rounded-full" />
+                  <img :src="task.picture" alt="" class="mt-1 h-8 rounded-full" />
                 </div>
               </a>
             </li>
@@ -276,7 +276,7 @@ async function newIssue() {
                     {{ task.severity }}
                   </div>
 
-                  <img :src=task.picture  alt="" class="mt-1 h-8 rounded-full" />
+                  <img :src="task.picture" alt="" class="mt-1 h-8 rounded-full" />
                 </div>
               </a>
             </li>
