@@ -10,8 +10,11 @@ const review = ref([]);
 const archive = ref([]);
 
 const open = ref(false);
+const open2 = ref(false);
 const email = ref("");
+const invitedEmail = ref("");
 const pic = ref("");
+const tableArray = ref([]);
 
 async function sessionData() {
   const { data, error } = await supabase.auth.getSession();
@@ -100,6 +103,21 @@ async function newIssue() {
     getArchive();
   }
 }
+
+async function inviteMember() {
+  const { data } = await supabase.from("access").select().eq("tableName", "grand budapest");
+  tableArray.value = data[0].members.split(",");
+  console.log(tableArray.value);
+
+
+  tableArray.value.push(invitedEmail.value);
+  var string = "";
+  for (let i = 0; i < tableArray.value.length; i++) {
+    string += tableArray.value[i] + ",";
+  }
+  const { error } = await supabase.from("access").update({members: string}).eq("tableName", "grand budapest");
+
+}
 </script>
 
 <template>
@@ -141,13 +159,16 @@ async function newIssue() {
 
     <section class="w-[85vw]">
       <router-link to="/projects">
-        <div class="text-gray-600 pl-8 pt-8"> <span class="underline text-orange-600">Projects</span>/ Grand Budapest</div>
+        <div class="text-gray-600 pl-8 pt-8"><span class="underline text-orange-600">Projects</span>/ Grand Budapest</div>
       </router-link>
-      <main class="flex justify-between pb-4">
+      <main class="flex justify-between pb-4 h-14">
         <h2 class="text-gray-700 font-semibold text-3xl pl-8">Board</h2>
         <!-- weird thing I found -->
         <!-- if a button is not wrapped around another parent container, in flex it will take up the height of parent component -->
-        <button class="bg-blue-600 text-sm font-medium text-white px-6 rounded mr-8" @click="open = true">+ New Issue</button>
+        <div class="h-full">
+          <button class="bg-gray-50 text-orange-600 text-sm ring-2 ring-inset ring-orange-600 font-medium px-6 py-2 rounded mr-4" @click="open2 = true">Add members</button>
+          <button class="bg-orange-600 text-sm font-medium text-white px-6 py-2 rounded mr-8" @click="open = true">+ New Issue</button>
+        </div>
       </main>
       <!-- tasks -->
 
@@ -341,6 +362,48 @@ async function newIssue() {
                   @click="newIssue()"
                 >
                   Submit
+                </button>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
+  <TransitionRoot as="template" :show="open2">
+    <Dialog as="div" class="relative z-10" @close="open2 = false">
+      <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full justify-center text-center items-center">
+          <TransitionChild
+            as="template"
+            enter="ease-out duration-300"
+            enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            enter-to="opacity-100 translate-y-0 sm:scale-100"
+            leave="ease-in duration-200"
+            leave-from="opacity-100 translate-y-0 sm:scale-100"
+            leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          >
+            <DialogPanel class="relative transform overflow-hidden rounded-sm bg-white text-left shadow-xl transition-all px-10 py-10 w-[22vw]">
+              <h2 class="text-center mb-2 text-lg">Add members</h2>
+
+              <label for="" class="text-xs text-black font-medium">Email</label> <br />
+              <input type="email" v-model="invitedEmail" name="name" placeholder="john.doe@gmail.com" id="" class="border-gray-300 border-2 w-full rounded text-sm px-2 py-2 mb-2" /> <br />
+
+              <div class="mx-auto flex justify-end mt-4">
+                <button
+                  type="button"
+                  class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                  @click="open2 = false"
+                  ref="cancelButtonRef"
+                >
+                  Cancel
+                </button>
+                <button type="button" class="inline-flex w-full justify-center rounded-md px-5 py-2 text-sm font-semibold text-white shadow-sm bg-orange-600 sm:ml-3 sm:w-auto" @click="inviteMember()">
+                  Invite
                 </button>
               </div>
             </DialogPanel>
