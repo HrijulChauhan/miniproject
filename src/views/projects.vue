@@ -1,13 +1,16 @@
 <template class="text-center tracking-tight">
-  <router-link to="/"> <p class="mt-20 text-center text-xl font-semibold tracking-tight mb-5">Tables for</p></router-link>
+  <p class="mt-20 text-center text-xl font-semibold tracking-tight mb-5">Boards for {{ name }}</p>
   <div v-for="(item, index) in tableArray" :key="index" class="text-center">
-    {{ item }}
+    <router-link :to="{name: 'home', params: {id: item}}">
+      {{ item }}
+    </router-link>
   </div>
+
   <div class="flex justify-center mt-10">
     <button class="bg-blue-600 text-sm font-medium text-white px-6 text-center rounded py-2 m-2" @click="open = true">+ Add table</button>
-    <router-link to="/login"><button class="bg-blue-600 text-sm font-medium text-white px-6 text-center rounded py-2 m-2" >Login</button></router-link>
-    <router-link to="/signup"><button class="bg-blue-600 text-sm font-medium text-white px-6 text-center rounded py-2 m-2" >SignUp</button></router-link>
-    <router-link to="/profile"><button class="bg-blue-600 text-sm font-medium text-white px-6 text-center rounded py-2 m-2" >View Profile</button></router-link>
+    <router-link to="/login"><button class="bg-blue-600 text-sm font-medium text-white px-6 text-center rounded py-2 m-2">Login</button></router-link>
+    <router-link to="/signup"><button class="bg-blue-600 text-sm font-medium text-white px-6 text-center rounded py-2 m-2">SignUp</button></router-link>
+    <router-link to="/profile"><button class="bg-blue-600 text-sm font-medium text-white px-6 text-center rounded py-2 m-2">View Profile</button></router-link>
     <TransitionRoot as="template" :show="open">
       <Dialog as="div" class="relative z-10" @close="open = false">
         <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
@@ -67,6 +70,7 @@ const tableArray = ref([]);
 const email = ref("");
 const boardName = ref("");
 const open = ref(false);
+const name = ref("");
 
 onMounted(() => {
   sessionData();
@@ -77,14 +81,22 @@ async function sessionData() {
   email.value = data.session.user.email;
   console.log(email.value);
 
+  getName();
   getData();
+}
+
+async function getName(){
+  const {data} = await supabase.from("users").select("name").eq("email", email.value);
+  name.value = data[0].name;
 }
 async function getData() {
   console.log("in data " + email.value);
   const { data } = await supabase.from("boards").select("tableName").eq("email", email.value);
   tables.value = data[0].tableName;
   tableArray.value = tables.value.split(",");
+  tableArray.value.pop();
   console.log(tableArray.value.length);
+  console.log(tableArray.value);
 }
 
 async function newTable() {

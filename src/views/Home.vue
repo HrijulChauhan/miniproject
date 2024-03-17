@@ -1,6 +1,7 @@
 <script setup>
 import { supabase } from "../lib/supabaseClient";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUpdated } from "vue";
+import { useRoute } from "vue-router";
 
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 
@@ -15,6 +16,8 @@ const email = ref("");
 const invitedEmail = ref("");
 const pic = ref("");
 const tableArray = ref([]);
+const route = useRoute();
+const boardName = ref("");
 
 async function sessionData() {
   const { data, error } = await supabase.auth.getSession();
@@ -29,8 +32,12 @@ async function sessionData() {
 }
 
 async function getTodo() {
-  const { data } = await supabase.from("tasks").select().eq("tag", "todo");
+  console.log("in todo");
+  boardName.value = route.params.id;
+  console.log(boardName.value);
+  const { data } = await supabase.from("tasks").select().eq("tag", "todo").eq("tableName", boardName.value);;
   todo.value = data;
+  console.log(data);
 
   todo.value.forEach((element) => {
     var regexDate = new Date(element.created_at).toString();
@@ -41,7 +48,7 @@ async function getTodo() {
 }
 
 async function getProgress() {
-  const { data } = await supabase.from("tasks").select().eq("tag", "progress");
+  const { data } = await supabase.from("tasks").select().eq("tag", "progress").eq("tableName", boardName.value);;
   progress.value = data;
 
   progress.value.forEach((element) => {
@@ -53,7 +60,7 @@ async function getProgress() {
 }
 
 async function getReview() {
-  const { data } = await supabase.from("tasks").select().eq("tag", "review");
+  const { data } = await supabase.from("tasks").select().eq("tag", "review").eq("tableName", boardName.value);;
   review.value = data;
 
   review.value.forEach((element) => {
@@ -65,7 +72,7 @@ async function getReview() {
 }
 
 async function getArchive() {
-  const { data } = await supabase.from("tasks").select().eq("tag", "archive");
+  const { data } = await supabase.from("tasks").select().eq("tag", "archive").eq("tableName", boardName.value);;
   archive.value = data;
 
   archive.value.forEach((element) => {
@@ -89,7 +96,7 @@ const tag = ref("");
 const severity = ref("");
 
 async function newIssue() {
-  const { error } = await supabase.from("tasks").insert({ title: title.value, tag: tag.value, severity: severity.value, picture: pic.value });
+  const { error } = await supabase.from("tasks").insert({ title: title.value, tag: tag.value, severity: severity.value, picture: pic.value, tableName : boardName.value });
   if (error) {
     console.log(error);
   } else {
@@ -109,14 +116,12 @@ async function inviteMember() {
   tableArray.value = data[0].members.split(",");
   console.log(tableArray.value);
 
-
   tableArray.value.push(invitedEmail.value);
   var string = "";
   for (let i = 0; i < tableArray.value.length; i++) {
     string += tableArray.value[i] + ",";
   }
-  const { error } = await supabase.from("access").update({members: string}).eq("tableName", "grand budapest");
-
+  const { error } = await supabase.from("access").update({ members: string }).eq("tableName", "grand budapest");
 }
 </script>
 
